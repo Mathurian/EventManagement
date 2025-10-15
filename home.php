@@ -26,6 +26,7 @@ include('session.php');
   <link href="assets/css/docs1.css" rel="stylesheet">
   <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
   <link rel="stylesheet" href="yearpicker.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
  
 
@@ -160,12 +161,14 @@ include('session.php');
 <!-- Modal -->
 <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="addEventModalLabel" style="z-index: 1050;">
   <div class="modal-dialog" role="document">
-    <div class="modal-content">
+<div class="modal-content">
+      <?php include 'csrf.php'; ?>
       <form method="POST">
         <div class="modal-header">
           <h4 class="modal-title" id="addEventModalLabel"><strong>ADD EVENT</strong></h4>
         </div>
         <div class="modal-body">
+            <?php echo csrf_field(); ?>
             <strong>Event Name:</strong><br />
             <input type="text" name="main_event" class="form-control btn-block" style="text-indent: 5px; height: 30px;" placeholder="Event Name" required value="<?php echo isset($_POST['main_event']) ? htmlspecialchars($_POST['main_event']) : ''; ?>" /><br />
 
@@ -201,16 +204,18 @@ include('session.php');
 
 
             <?php
-            $sy_query = $conn->query("select DISTINCT sy, sy2 FROM main_event where organizer_id='$session_id'") or die(mysql_error());
-            while ($sy_row = $sy_query->fetch()) {
+            $sy_stmt = $conn->prepare("SELECT DISTINCT sy, sy2 FROM main_event WHERE organizer_id = :oid");
+            $sy_stmt->execute([':oid' => $session_id]);
+            while ($sy_row = $sy_stmt->fetch()) {
 
               $sy = $sy_row['sy'];
               $sy2 = $sy_row['sy2'];
 
 
 
-              $MEctrQuery = $conn->query("select * FROM main_event where sy='$sy'") or die(mysql_error());
-              $MECtr = $MEctrQuery->rowCount();
+              $MEctrStmt = $conn->prepare("SELECT * FROM main_event WHERE sy = :sy");
+              $MEctrStmt->execute([':sy' => $sy]);
+              $MECtr = $MEctrStmt->rowCount();
 
             ?>
 
@@ -241,8 +246,9 @@ include('session.php');
 
                       $myME_ctr = 0;
 
-                      $event_query = $conn->query("select * from main_event where organizer_id='$session_id' AND sy='$sy'") or die(mysql_error());
-                      while ($event_row = $event_query->fetch()) {
+                      $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE organizer_id = :oid AND sy = :sy");
+                      $event_stmt->execute([':oid' => $session_id, ':sy' => $sy]);
+                      while ($event_row = $event_stmt->fetch()) {
 
 
 
@@ -251,8 +257,9 @@ include('session.php');
                         $main_event_id = $event_row['mainevent_id'];
 
 
-                        $SEctrQuery = $conn->query("select * FROM sub_event where mainevent_id='$main_event_id'") or die(mysql_error());
-                        $SECtr = $SEctrQuery->rowCount();
+                        $SECtrStmt = $conn->prepare("SELECT * FROM sub_event WHERE mainevent_id = :meid");
+                        $SECtrStmt->execute([':meid' => $main_event_id]);
+                        $SECtr = $SECtrStmt->rowCount();
 
                       ?>
 
@@ -361,8 +368,9 @@ include('session.php');
 
                                             <?php
                                             $se_ctr = 0;
-                                            $sub_event_query = $conn->query("select * from sub_event where mainevent_id='$main_event_id'") or die(mysql_error());
-                                            while ($sub_event_row = $sub_event_query->fetch()) {
+                                            $sub_event_stmt = $conn->prepare("SELECT * FROM sub_event WHERE mainevent_id = :meid");
+                                            $sub_event_stmt->execute([':meid' => $main_event_id]);
+                                            while ($sub_event_row = $sub_event_stmt->fetch()) {
                                               $se_ctr++;
                                               $sub_event_id = $sub_event_row['subevent_id'];   ?>
 
@@ -1168,7 +1176,6 @@ if (isset($_GET['error']) && $_GET['error'] == 'true') {
 
 
  
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
   <script src="assets/js/holder/holder.js"></script>
   <script src="assets/js/google-code-prettify/prettify.js"></script>
