@@ -52,7 +52,7 @@ include('session.php');
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="brand" href="#">
+        <a class="brand" href="javascript:void(0)">
           <font size="3">SWU-ETS</font>
         </a>
 
@@ -80,7 +80,7 @@ include('session.php');
             </li>
 
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Account <span class="caret"></span></a>
+              <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Account <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
 
 
@@ -612,7 +612,7 @@ if (isset($_POST['edit_se'])) {
                                                 <td colspan="3">
                                                   <div class="alert alert-warning">
                                                     <h3>
-                                                      No data to display. Add Sub-Event <a href="#" data-toggle="collapse" data-target="#addSubEvents<?php echo $main_event_id; ?>" data-parent="#myGroup<?php echo $main_event_id; ?>"> here &raquo;</a>
+                                                      No data to display. Add Sub-Event <a href="javascript:void(0)" data-toggle="collapse" data-target="#addSubEvents<?php echo $main_event_id; ?>" data-parent="#myGroup<?php echo $main_event_id; ?>"> here &raquo;</a>
                                                     </h3>
                                                   </div>
                                                 </td>
@@ -1138,9 +1138,7 @@ if (isset($_GET['error']) && $_GET['error'] == 'true') {
   <?php include('footer.php'); ?>
 
 
-  <script>
-    $('.yearpicker').yearpicker()
-  </script>
+  
 
 <script>
    $(document).ready(function() {
@@ -1181,6 +1179,11 @@ if (isset($_GET['error']) && $_GET['error'] == 'true') {
   <script src="assets/js/google-code-prettify/prettify.js"></script>
   <script src="assets/js/application.js"></script>
   <script src="yearpicker.js"></script>
+  <script>
+    $(function(){
+      $('.yearpicker').yearpicker();
+    });
+  </script>
   
 
 
