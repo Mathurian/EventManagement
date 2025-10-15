@@ -29,14 +29,16 @@
  
 
          
-             $s_event_query = $conn->query("select * from sub_event where subevent_id='$event_id'") or die(mysql_error());
-		while ($s_event_row = $s_event_query->fetch()) 
+            $s_event_stmt = $conn->prepare("SELECT * FROM sub_event WHERE subevent_id = :sid");
+		$s_event_stmt->execute([':sid' => $event_id]);
+		while ($s_event_row = $s_event_stmt->fetch()) 
         {
             $MEidxx=$s_event_row['mainevent_id'];
             $eventBanner = $s_event_row['event_banner'];
             
-              $event_query = $conn->query("select * from main_event where mainevent_id='$MEidxx'") or die(mysql_error());
-		while ($event_row = $event_query->fetch()) 
+             $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE mainevent_id = :meid");
+		$event_stmt->execute([':meid' => $MEidxx]);
+		while ($event_row = $event_stmt->fetch()) 
         {
             
             ?>
@@ -107,12 +109,13 @@
              <table>
              <tr>
              <td align="center">
-            <h2><?php echo $event_row['event_name']; ?></h2> 
+           <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; use App\Support\Database; require_once __DIR__ . '/config.php'; $db = new Database($pdo); ?>
+           <h2><?php echo View::e($event_row['event_name']); ?></h2> 
              </td>
               </tr>
                <tr>
              <td align="center">
-            <h3><?php echo $s_event_row['event_name']; ?></h3> 
+           <h3><?php echo View::e($s_event_row['event_name']); ?></h3> 
             <button class="btn btn-warning pull-center non-printable" style="width: 100px;" onclick="window.print();">PRINT</button>
              </td>
               </tr>
@@ -127,8 +130,8 @@
      <th>No. &amp; Contingent Name</th>
      <th>Department</th>
         <?php
-        $criteria_query = $conn->query("select * from criteria where subevent_id='$event_id' ORDER BY criteria_ctr ASC") or die(mysql_error());
-        while ($crit_row = $criteria_query->fetch()) {
+        $criteria_rows = $db->fetchAll("SELECT * FROM criteria WHERE subevent_id = :sid ORDER BY criteria_ctr ASC", [':sid' => $event_id]);
+        foreach ($criteria_rows as $crit_row) {
           
         
          ?>
@@ -146,14 +149,12 @@
     <?php
     
   
-    $score_query = $conn->query("select * from sub_results where subevent_id='$event_id' and judge_id='$judge_id' ORDER BY CAST(rank AS UNSIGNED) ASC, contestant_id ASC") or die(mysql_error());
+    $score_rows = $db->fetchAll("SELECT * FROM sub_results WHERE subevent_id = :sid AND judge_id = :jid ORDER BY CAST(rank AS UNSIGNED) ASC, contestant_id ASC", [':sid' => $event_id, ':jid' => $judge_id]);
 
 
 
-	$num_rowxz = $score_query->rowcount();
-    
-if( $num_rowxz > 0 ) { 
-while ($score_row = $score_query->fetch())
+if (count($score_rows) > 0) { 
+foreach ($score_rows as $score_row)
  {
  
      $s1=$score_row['criteria_ctr1'];
@@ -177,8 +178,8 @@ while ($score_row = $score_query->fetch())
          <tr>
          <td>
         <?php
-        $cont_query = $conn->query("select * from contestants where contestant_id='$con_id'") or die(mysql_error());
-        while ($cont_row = $cont_query->fetch()) {
+        $cont_rows = $db->fetchAll("SELECT * FROM contestants WHERE contestant_id = :cid", [':cid' => $con_id]);
+        foreach ($cont_rows as $cont_row) {
             $c_num = $cont_row['contestant_ctr'];
             $cfnme = $cont_row['fname'];
             $cmnme = $cont_row['mname'];
@@ -195,8 +196,8 @@ while ($score_row = $score_query->fetch())
         
           <?php
           
-        $criteria_query = $conn->query("select * from criteria where subevent_id='$event_id' ORDER BY criteria_ctr ASC") or die(mysql_error());
-while ($crit_row = $criteria_query->fetch()) {
+        $criteria_rows2 = $db->fetchAll("SELECT * FROM criteria WHERE subevent_id = :sid ORDER BY criteria_ctr ASC", [':sid' => $event_id]);
+foreach ($criteria_rows2 as $crit_row) {
       
          ?>
         <td>
@@ -258,8 +259,9 @@ while ($crit_row = $criteria_query->fetch()) {
      
           </table>
           
-          <?php $j_query = $conn->query("select * from judges where subevent_id='$event_id' and judge_id='$judge_id'") or die(mysql_error());
-while ($j_row = $j_query->fetch()) { ?>
+          <?php $j_stmt = $conn->prepare("SELECT * FROM judges WHERE subevent_id = :sid AND judge_id = :jid");
+$j_stmt->execute([':sid' => $event_id, ':jid' => $judge_id]);
+while ($j_row = $j_stmt->fetch()) { ?>
              <hr />
              <table align="center">
              <tr>

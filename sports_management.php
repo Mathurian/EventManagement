@@ -362,7 +362,9 @@ function getContestantByRank($pdo, $event_id, $sport_id, $rank)
         <!--------------------Add Contestant------------------------->
         <div id="contestantCard<?= $event['id'] ?>" style="display:none; margin-left:50px;">
     <h4>Add Contingent</h4>
+    <?php include 'csrf.php'; ?>
     <form action="functions.php" method="POST" enctype="multipart/form-data">
+        <?php echo csrf_field(); ?>
         <input type="hidden" value="<?= $event['id'] ?>" name="id">
         
         <!-- Container to hold dynamic contingent input fields -->
@@ -448,6 +450,7 @@ if (isset($_GET['id'])) {
         <div id="sportsCard<?= $event['id'] ?>" style="display:none; margin-left:50px;">
     <h4>Add Sport</h4>
     <form action="functions.php" method="POST" enctype="multipart/form-data">
+        <?php echo csrf_field(); ?>
         <input type="hidden" value="<?= $event['id'] ?>" name="id">
         
         <!-- Container for Dynamic Sports Name Fields -->
@@ -512,6 +515,7 @@ if (isset($_GET['id'])) {
             <h4>Sport Tagging</h4>
            
               <form action="functions.php" method="POST" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
               <?php
               $eventData = getEventData($event['id']);
               $contestants = $eventData['contestants'];
@@ -584,6 +588,7 @@ if (isset($_GET['id'])) {
 
 
 <form action="functions.php" method="POST" enctype="multipart/form-data">
+    <?php echo csrf_field(); ?>
     <?php
         $event_id = $event['id'];
         $names = fetchNames($event_id, $pdo);
@@ -973,6 +978,7 @@ function removeSportsField(element) {
       </div>
       <div class="modal-body">
         <form method="POST" action="functions.php" id="eventForm">
+            <?php echo csrf_field(); ?>
           <strong>Sports Event Name:</strong><br />
           <input type="text" name="sport_event_name" class="form-control btn-block" style="text-indent: 5px !important; height: 30px !important;" placeholder="Sports Event Name" required value="<?php echo isset($_POST['sport_event_name']) ? htmlspecialchars($_POST['sport_event_name']) : ''; ?>" /><br />
 

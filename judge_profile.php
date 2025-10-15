@@ -2,10 +2,16 @@
 include('session.php');
 
 if (isset($_POST['judge_code'])) {
+    if (file_exists(__DIR__ . '/csrf.php')) {
+        include_once __DIR__ . '/csrf.php';
+        if (!csrf_validate()) {
+            header('Location: judgelogin.php');
+            exit;
+        }
+    }
     $judge_code = $_POST['judge_code'];
 
-    // Debug: Print the entered judge code
-    echo "Entered Code: " . $judge_code . "<br>";
+    // Removed debug echo to avoid information disclosure
 
     // Use a prepared statement to fetch the judge
     $stmt = $conn->prepare("SELECT * FROM judges WHERE code = ?");
@@ -18,19 +24,11 @@ if (isset($_POST['judge_code'])) {
 		$judge_ctr = $row['judge_ctr'];
 
 		$subevent_id = $row['subevent_id'];
-		?>
-		<script>
-    window.location.href = "judge_panel.php?judge_ctr=<?php echo $judge_ctr; ?>&subevent_id=<?php echo $subevent_id; ?>";
-</script>
-
-		<?php
+    		header("Location: judge_panel.php?judge_ctr={$judge_ctr}&subevent_id={$subevent_id}");
+    		exit;
 	} else {
-		?>
-		<script>
-			alert('wrong code');
-			window.location = 'judgelogin.php';
-		</script>
-		<?php
+        header('Location: judgelogin.php');
+        exit;
 	}
 }
 

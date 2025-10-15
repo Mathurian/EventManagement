@@ -1,5 +1,12 @@
 <?php
 session_start();
+if (file_exists(__DIR__ . '/csrf.php')) {
+	include_once __DIR__ . '/csrf.php';
+	if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_validate()) {
+		echo "<script>alert('Invalid session token.'); window.location = 'sports_management.php';</script>";
+		exit;
+	}
+}
 include 'config.php';
 
 

@@ -26,7 +26,9 @@ include('header2.php');
 </header>
 
 <div class="container">        
+        <?php include 'csrf.php'; ?>
         <form method="POST" action="reset_password.php">
+            <?php echo csrf_field(); ?>
             <br />  
             <table cellpadding="10" cellspacing="0" border="0" align="center">
                 <thead>

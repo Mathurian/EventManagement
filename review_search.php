@@ -132,8 +132,8 @@
           
            
  <?php   
-          $event_query = $conn->query("select * from main_event where event_name like '%$txtsearch%'") or die(mysql_error());
-	 
+         $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE event_name LIKE :q");
+         $event_stmt->execute([':q' => "%$txtsearch%"]);
             
      
      $menum_row = $event_query->rowcount();
@@ -172,8 +172,8 @@
     <!-- sub event -->
     
     <?php   
-          $event_query = $conn->query("select * from sub_event where event_name like '%$txtsearch%'") or die(mysql_error());
-	 
+         $se_stmt = $conn->prepare("SELECT * FROM sub_event WHERE event_name LIKE :q");
+         $se_stmt->execute([':q' => "%$txtsearch%"]);
            
      
      $menum_row = $event_query->rowcount();
@@ -214,8 +214,8 @@
         <!-- contestants -->  
       
       <?php   
-          $event_query = $conn->query("select * from contestants where fname like '%$txtsearch%'") or die(mysql_error());
-	
+         $cont_stmt = $conn->prepare("SELECT * FROM contestants WHERE fname LIKE :q");
+         $cont_stmt->execute([':q' => "%$txtsearch%"]);
      $menum_row = $event_query->rowcount();
         if( $menum_row > 0)
         { ?>
@@ -254,8 +254,8 @@
       <!-- judges -->  
       
       <?php   
-          $event_query = $conn->query("select * from judges where fullname like '%$txtsearch%'") or die(mysql_error());
- 
+         $j_stmt = $conn->prepare("SELECT * FROM judges WHERE fullname LIKE :q");
+         $j_stmt->execute([':q' => "%$txtsearch%"]);
      $menum_row = $event_query->rowcount();
         if( $menum_row > 0)
         { ?>

@@ -1,0 +1,12 @@
+Thumbs.db
+*.log
+.env
+vendor/
+node_modules/
+*.sqlite
+*.sqlite3
+new database/
+db/*.sql
+uploads/*
+!uploads/.gitkeep
+

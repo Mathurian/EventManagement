@@ -175,8 +175,9 @@ div.panel {
       
 <?php
     
-$sy_query = $conn->query("select * FROM main_event where organizer_id='$session_id' AND status='activated'") or die(mysql_error());
-while ($sy_row = $sy_query->fetch()) 
+$sy_stmt = $conn->prepare("SELECT * FROM main_event WHERE organizer_id = :id AND status = 'activated'");
+$sy_stmt->execute([':id' => $session_id]);
+while ($sy_row = $sy_stmt->fetch()) 
 { ?>
 
 <tr>
@@ -187,8 +188,9 @@ while ($sy_row = $sy_query->fetch())
 $sy=$sy_row['sy'];
 $MEidxxx=$sy_row['mainevent_id'];
   
-          $event_query = $conn->query("select * from main_event where mainevent_id='$MEidxxx' AND status='activated'") or die(mysql_error());
-		while ($event_row = $event_query->fetch()) 
+         $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE mainevent_id = :meid AND status = 'activated'");
+		$event_stmt->execute([':meid' => $MEidxxx]);
+		while ($event_row = $event_stmt->fetch()) 
         { ?>
        
            <button class="accordion"><strong><?php echo $event_row['event_name']; ?></strong></button> 
@@ -209,8 +211,9 @@ $MEidxxx=$sy_row['mainevent_id'];
           
           <tbody>
          <?php   
-          $s_event_query = $conn->query("select * from sub_event where mainevent_id='$MEidxxx'") or die(mysql_error());
-		while ($s_event_row = $s_event_query->fetch()) 
+         $s_event_stmt = $conn->prepare("SELECT * FROM sub_event WHERE mainevent_id = :meid");
+		$s_event_stmt->execute([':meid' => $MEidxxx]);
+		while ($s_event_row = $s_event_stmt->fetch()) 
         { 
             $se_id=$s_event_row['subevent_id'];
             ?>
@@ -225,8 +228,9 @@ $MEidxxx=$sy_row['mainevent_id'];
      <td>
  
      <?php   
-          $judge_query = $conn->query("select * from judges where subevent_id='$se_id' order by judge_ctr") or die(mysql_error());
-		while ($judge_row = $judge_query->fetch()) 
+         $judge_stmt = $conn->prepare("SELECT * FROM judges WHERE subevent_id = :seid ORDER BY judge_ctr");
+		$judge_stmt->execute([':seid' => $se_id]);
+		while ($judge_row = $judge_stmt->fetch()) 
         { ?>
      
      <a style="margin-top: 4px !important;" title="click to rank contestant score's for this judge" target="_blank" href="view_score_sheet.php?event_id=<?php echo $se_id ; ?>&judge_id=<?php echo $judge_row['judge_id']; ?>" class="btn btn-info"><i class="icon icon-tasks"></i> <?php echo $judge_row['fullname']; ?></a>

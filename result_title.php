@@ -95,15 +95,17 @@ try {
         
            <?php   
            
-             $s_event_query = $conn->query("select * from sub_event where subevent_id='$active_sub_event'") or die(mysql_error());
-		while ($s_event_row = $s_event_query->fetch()) 
+             $s_event_stmt = $conn->prepare("SELECT * FROM sub_event WHERE subevent_id = :sid");
+		$s_event_stmt->execute([':sid' => $active_sub_event]);
+		while ($s_event_row = $s_event_stmt->fetch()) 
         {
             
             $MEidxx=$s_event_row['mainevent_id'];
             $eventBanner = $s_event_row['event_banner'];
             
-              $event_query = $conn->query("select * from main_event where mainevent_id='$MEidxx'") or die(mysql_error());
-		while ($event_row = $event_query->fetch()) 
+              $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE mainevent_id = :meid");
+		$event_stmt->execute([':meid' => $MEidxx]);
+		while ($event_row = $event_stmt->fetch()) 
         {
             
             ?>
@@ -166,12 +168,13 @@ try {
              <table>
              <tr>
              <td align="center">
-            <h3><?php echo $event_row['event_name']; ?></h3> 
+           <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; use App\Support\Database; require_once __DIR__ . '/config.php'; $db = new Database($pdo); ?>
+           <h3><?php echo View::e($event_row['event_name']); ?></h3> 
              </td>
               </tr>
               <tr>
               <td align="center">
-              <h4> <?php echo $s_event_row['event_name']; ?></h4>
+             <h4> <?php echo View::e($s_event_row['event_name']); ?></h4>
               </td>
               </tr>
                <tr>
@@ -199,14 +202,14 @@ try {
                 
      <?php
         
-        $o_result_query = $conn->query("SELECT DISTINCT contestant_id, place_title FROM sub_results WHERE mainevent_id='$MEidxx' AND subevent_id='$active_sub_event' ORDER BY LENGTH(place_title), place_title ASC") or die(mysql_error());
+        $o_result_rows = $db->fetchAll("SELECT DISTINCT contestant_id, place_title FROM sub_results WHERE mainevent_id = :meid AND subevent_id = :sid ORDER BY LENGTH(place_title), place_title ASC", [':meid' => $MEidxx, ':sid' => $active_sub_event]);
 
-while ($o_result_row = $o_result_query->fetch()) {
+foreach ($o_result_rows as $o_result_row) {
     
   $contestant_id = $o_result_row['contestant_id'];
 
-  $cname_query = $conn->query("SELECT * FROM contestants WHERE contestant_id='$contestant_id'") or die(mysql_error());
-  while ($cname_row = $cname_query->fetch()) {
+  $cname_rows = $db->fetchAll("SELECT * FROM contestants WHERE contestant_id = :cid", [':cid' => $contestant_id]);
+  foreach ($cname_rows as $cname_row) {
       $contXXname = $cname_row['contestant_ctr'] . " " . $cname_row['lname'] . " " . $cname_row['fname'] . " " . $cname_row['mname'];
       $department = $cname_row['department']; 
   }
@@ -214,8 +217,8 @@ while ($o_result_row = $o_result_query->fetch()) {
          ?>
          <tr>
          <tr>
-               <td><h5><?php echo $contXXname; ?></h5></td>
-               <td><?php echo $department; ?></td> 
+              <td><h5><?php echo View::e($contXXname); ?></h5></td>
+              <td><?php echo View::e($department); ?></td> 
                <td>
                    <table class="table table-bordered">
            <tr>
@@ -229,8 +232,8 @@ $divz=0;
 $totx_score=0;
 $rank_score=0;
  
-$tot_score_query = $conn->query("select * from sub_results where contestant_id='$contestant_id'") or die(mysql_error());
-while ($tot_score_row = $tot_score_query->fetch()) 
+$tot_score_rows = $db->fetchAll("SELECT * FROM sub_results WHERE contestant_id = :cid", [':cid' => $contestant_id]);
+foreach ($tot_score_rows as $tot_score_row) 
 {
   $divz=$divz+1;  
 
@@ -239,8 +242,8 @@ while ($tot_score_row = $tot_score_query->fetch())
 } 
 
 
-$tot_score_query = $conn->query("select judge_id,total_score, deduction, rank from sub_results where contestant_id='$contestant_id' ORDER BY judge_id") or die(mysql_error());
-while ($tot_score_row = $tot_score_query->fetch()) 
+$tot_score_rows2 = $db->fetchAll("SELECT judge_id,total_score, deduction, rank FROM sub_results WHERE contestant_id = :cid ORDER BY judge_id", [':cid' => $contestant_id]);
+foreach ($tot_score_rows2 as $tot_score_row) 
 {
      $totx_score=$totx_score+$tot_score_row['total_score'];
      $rank_score=$rank_score+$tot_score_row['rank'];
@@ -251,8 +254,7 @@ while ($tot_score_row = $tot_score_query->fetch())
   
    <tr>
    <td style="width: 50% !important;"><?php $jx_id=$tot_score_row['judge_id'];
-    $jname_query = $conn->query("select * from judges where judge_id='$jx_id'") or die(mysql_error());
-$jname_row = $jname_query->fetch();
+    $jname_row = $db->fetchOne("SELECT * FROM judges WHERE judge_id = :jid", [':jid' => $jx_id]);
  echo $jname_row['fullname'];
     ?></td>
    <td style="width: 25% !important; text-align: center;"><?php echo $tot_score_row['total_score']-$tot_score_row['deduction']; ?></td>
@@ -280,8 +282,9 @@ $jname_row = $jname_query->fetch();
           <h3>
           <?php
           
-          $pt_result_query = $conn->query("SELECT * FROM sub_results WHERE contestant_id='$contestant_id'") or die(mysql_error());
-          $pt_result_row = $pt_result_query->fetch();
+          $pt_result_stmt = $conn->prepare("SELECT * FROM sub_results WHERE contestant_id = :cid");
+          $pt_result_stmt->execute([':cid' => $contestant_id]);
+          $pt_result_row = $pt_result_stmt->fetch();
     
           echo $pt_result_row['place_title'];
           

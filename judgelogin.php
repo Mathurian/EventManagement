@@ -88,7 +88,9 @@
       
        <div class="input-group">
        <div class="alert alert-success alert-judge-login">
+      <?php include 'csrf.php'; ?>
       <form method="POST" action="judge_profile.php" >
+        <?php echo csrf_field(); ?>
             <h4>Judge's Code</h4>
             <br />
           <input id="myInputJC" style="font-size: large; height: 45px !important;" class="form-control btn-block" name="judge_code" type="password" placeholder="Enter Judge's Code" />

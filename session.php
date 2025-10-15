@@ -3,11 +3,9 @@ include('dbcon.php');
 //Start session
  session_start();
 //Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['id']) || ($_SESSION['id'] == '')) { ?>
-  	<script>
-								window.location = 'index.php';
-							</script><?php
-    exit();
+if (!isset($_SESSION['id']) || ($_SESSION['id'] == '')) {
+	header('Location: index.php');
+	exit();
 }
 
 $session_id=$_SESSION['id'];
@@ -18,19 +16,22 @@ $tabname="";
 
 if($session_access=="Organizer")
 {
-$user_query = $conn->query("select * from organizer where organizer_id = '$session_id'");
-$user_row = $user_query->fetch();
+$user_stmt = $conn->prepare("SELECT * FROM organizer WHERE organizer_id = :id");
+$user_stmt->execute([':id' => $session_id]);
+$user_row = $user_stmt->fetch();
 
 }
 else
 {
 $session_userid=$_SESSION['userid'];
-$user_query = $conn->query("select * from organizer where organizer_id = '$session_id'");
-$user_row = $user_query->fetch();
+$user_stmt1 = $conn->prepare("SELECT * FROM organizer WHERE organizer_id = :id");
+$user_stmt1->execute([':id' => $session_id]);
+$user_row = $user_stmt1->fetch();
 
 
-$tab_query = $conn->query("select * from organizer where organizer_id = '$session_userid'");
-$tab_row = $tab_query->fetch();
+$tab_stmt = $conn->prepare("SELECT * FROM organizer WHERE organizer_id = :id");
+$tab_stmt->execute([':id' => $session_userid]);
+$tab_row = $tab_stmt->fetch();
 $tabname = $tab_row['fname']." ".$tab_row['mname']." ".$tab_row['lname'] ;    
 }
 

@@ -32,7 +32,9 @@
 
 
         <div class="container">        
-            <form method="POST" action="login.php">
+           <?php include 'csrf.php'; ?>
+           <form method="POST" action="login.php">
+               <?php echo csrf_field(); ?>
                 <br />  
                 <table cellpadding="10" cellspacing="0" border="0" align="center">
                     <thead>

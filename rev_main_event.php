@@ -128,8 +128,9 @@
   
   <tbody>
    <?php    
-   	$mainevent_query = $conn->query("SELECT * FROM main_event") or die(mysql_error());
-    while ($mainevent_row = $mainevent_query->fetch()) 
+   	$mainevent_stmt = $conn->prepare("SELECT * FROM main_event");
+    $mainevent_stmt->execute();
+    while ($mainevent_row = $mainevent_stmt->fetch()) 
         { ?>
   <tr>
   <td width="10" align="center"><input type="radio" name="main_event_id" value="<?php echo $mainevent_row['mainevent_id']; ?>" required="true" /></td>

@@ -8,13 +8,17 @@ $error = '';
 // Include PHPMailer classes to the global namespace
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-require 'PHPMailer/src/Exception.php';
-require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/bootstrap.php';
 
 // Handle POST request
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (file_exists(__DIR__ . '/csrf.php')) {
+        include_once __DIR__ . '/csrf.php';
+        if (!csrf_validate()) {
+            echo "<script>alert('Invalid session token.'); window.location = 'forgot_password.php';</script>";
+            exit;
+        }
+    }
     $email = $_POST['email'];
     $newPassword = $_POST['newPassword'];
     $confirmNewPassword = $_POST['confirmNewPassword']; 
@@ -24,43 +28,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $checkUser = $conn->prepare("SELECT * FROM organizer WHERE email = :email");
+    $checkUser = $conn->prepare("SELECT organizer_id, email FROM organizer WHERE email = :email");
     $checkUser->bindParam(':email', $email, PDO::PARAM_STR);
     $checkUser->execute();
 
     if ($checkUser->rowCount() > 0) {
+        // Hash new password securely
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
         $updatePassword = $conn->prepare("UPDATE organizer SET password = :password WHERE email = :email");
-        $updatePassword->bindParam(':password', $newPassword, PDO::PARAM_STR);
+        $updatePassword->bindParam(':password', $hash, PDO::PARAM_STR);
         $updatePassword->bindParam(':email', $email, PDO::PARAM_STR);
         $updatePassword->execute();
 
         if ($updatePassword->rowCount() > 0) {
-            // Send email notification
+            // Send email notification without exposing password
             $mail = new PHPMailer(true);
 
             try {
-                // SMTP configuration
                 $mail->isSMTP();
-                $mail->Host       = 'smtp.gmail.com'; // Replace with your mail server
+                $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'johnmarieygot21@gmail.com'; // Replace with your SMTP username
-                $mail->Password   = 'jydr kyzs ejyf ewxv'; // Replace with your SMTP password
+                $mail->Username   = getenv('SMTP_USER') ?: '';
+                $mail->Password   = getenv('SMTP_PASS') ?: '';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port       = 587;
+                $mail->Port       = getenv('SMTP_PORT') ?: 587;
 
-                // Recipients
-                $mail->setFrom('johnmarieygot21@gmail.com', 'SWU-ETS');
-                $mail->addAddress($email); // Add a recipient
+                $fromEmail = getenv('SMTP_FROM') ?: ($mail->Username ?: 'no-reply@example.com');
+                $fromName  = getenv('SMTP_FROM_NAME') ?: 'SWU-ETS';
+                $mail->setFrom($fromEmail, $fromName);
+                $mail->addAddress($email);
 
-                // Email content
                 $mail->isHTML(true);
                 $mail->Subject = 'Password Updated Successfully';
-                $mail->Body    = 'Hello,<br><br>Your password has been successfully updated. <br><br>Your new password: ' . $newPassword . ' ';
-                $mail->AltBody = 'Hello, Your password has been successfully updated.';
+                $mail->Body    = 'Hello,<br><br>Your password has been updated successfully. If you did not request this change, please contact support immediately.';
+                $mail->AltBody = 'Your password has been updated successfully.';
 
-                $mail->send();
+                if ($mail->Username && $mail->Password) {
+                    $mail->send();
+                }
             } catch (Exception $e) {
-                // Handle errors here if you want to log or display error messages
+                // Silently ignore mail errors to not block UX
             }
 
             echo "<script>alert('Password updated successfully'); window.location = 'index.php';</script>";

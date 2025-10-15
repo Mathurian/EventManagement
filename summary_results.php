@@ -21,9 +21,10 @@ $active_main_event=$_GET['main_event_id'];
       <div class="span12">
 
         
-           <?php   
-          $event_query = $conn->query("select * from main_event where mainevent_id='$active_main_event'") or die(mysql_error());
-		while ($event_row = $event_query->fetch()) 
+          <?php   
+         $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE mainevent_id = :meid");
+		$event_stmt->execute([':meid' => $active_main_event]);
+		while ($event_row = $event_stmt->fetch()) 
         { 
  
             ?>
@@ -79,14 +80,16 @@ $active_main_event=$_GET['main_event_id'];
                         
             
 <?php   
-$sy_query = $conn->query("select DISTINCT sy FROM main_event where organizer_id='$session_id' AND mainevent_id='$active_main_event='") or die(mysql_error());
-while ($sy_row = $sy_query->fetch()) 
+$sy_stmt = $conn->prepare("SELECT DISTINCT sy FROM main_event WHERE organizer_id = :oid AND mainevent_id = :meid");
+$sy_stmt->execute([':oid' => $session_id, ':meid' => $active_main_event]);
+while ($sy_row = $sy_stmt->fetch()) 
 {
             
 $sy=$sy_row['sy'];
  
-$MEctrQuery = $conn->query("select * FROM main_event where sy='$sy'") or die(mysql_error());
-$MECtr = $MEctrQuery->rowCount();  ?>
+$MEctrStmt = $conn->prepare("SELECT * FROM main_event WHERE sy = :sy");
+$MEctrStmt->execute([':sy' => $sy]);
+$MECtr = $MEctrStmt->rowCount();  ?>
 
     
  
@@ -95,12 +98,14 @@ $MECtr = $MEctrQuery->rowCount();  ?>
 <td>   
        
                         <?php   
-                        $event_query = $conn->query("select * from main_event where organizer_id='$session_id' AND sy='$sy'") or die(mysql_error());
-                        while ($event_row = $event_query->fetch()) {
+                        $event_stmt2 = $conn->prepare("SELECT * FROM main_event WHERE organizer_id = :oid AND sy = :sy");
+                        $event_stmt2->execute([':oid' => $session_id, ':sy' => $sy]);
+                        while ($event_row = $event_stmt2->fetch()) {
                           $main_event_id = $event_row['mainevent_id'];
                                               
-                          $SEctrQuery = $conn->query("select * FROM sub_event where mainevent_id='$main_event_id'") or die(mysql_error());
-                          while ($SECtr = $SEctrQuery->fetch()) {
+                          $SECtrStmt = $conn->prepare("SELECT * FROM sub_event WHERE mainevent_id = :meid");
+                          $SECtrStmt->execute([':meid' => $main_event_id]);
+                          while ($SECtr = $SECtrStmt->fetch()) {
                               $rs_subevent_id = $SECtr['subevent_id'];
                       
                           

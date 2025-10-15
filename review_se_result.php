@@ -35,11 +35,13 @@
         ================================================== -->
         
            <?php   
-          $event_query = $conn->query("select * from main_event where mainevent_id='$active_main_event'") or die(mysql_error());
-		while ($event_row = $event_query->fetch()) 
+         $event_stmt = $conn->prepare("SELECT * FROM main_event WHERE mainevent_id = :meid");
+		$event_stmt->execute([':meid' => $active_main_event]);
+		while ($event_row = $event_stmt->fetch()) 
         { 
-             $s_event_query = $conn->query("select * from sub_event where subevent_id='$active_sub_event'") or die(mysql_error());
-		while ($s_event_row = $s_event_query->fetch()) 
+             $s_event_stmt = $conn->prepare("SELECT * FROM sub_event WHERE subevent_id = :sid");
+		$s_event_stmt->execute([':sid' => $active_sub_event]);
+		while ($s_event_row = $s_event_stmt->fetch()) 
         {
             
             ?>
@@ -71,12 +73,13 @@
              <table>
              <tr>
              <td align="center">
-            <h2><?php echo $event_row['event_name']; ?></h2> 
+           <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; ?>
+           <h2><?php echo View::e($event_row['event_name']); ?></h2> 
              </td>
               </tr>
                <tr>
              <td align="center">
-            <h3>Over All Result - <?php echo $s_event_row['event_name']; ?></h3> 
+           <h3>Over All Result - <?php echo View::e($s_event_row['event_name']); ?></h3> 
              </td>
               </tr>
                
@@ -97,22 +100,24 @@
      
      
      <?php
-        $o_result_query = $conn->query("
+       $o_result_stmt = $conn->prepare("
         SELECT contestant_id,
                CAST(SUBSTRING_INDEX(place_title, ' ', 1) AS UNSIGNED) AS numeric_rank
         FROM sub_results 
-        WHERE mainevent_id='$active_main_event' 
-          AND subevent_id='$active_sub_event' 
+        WHERE mainevent_id = :meid
+          AND subevent_id = :sid
         GROUP BY contestant_id 
         ORDER BY numeric_rank ASC, place_title ASC
-      ") or die(mysql_error());
+      ");
+      $o_result_stmt->execute([':meid' => $active_main_event, ':sid' => $active_sub_event]);
       
-while ($o_result_row = $o_result_query->fetch()) {
+while ($o_result_row = $o_result_stmt->fetch()) {
     
   $contestant_id = $o_result_row['contestant_id'];
 
-  $cname_query = $conn->query("SELECT * FROM contestants WHERE contestant_id='$contestant_id'") or die(mysql_error());
-  while ($cname_row = $cname_query->fetch()) {
+  $cname_stmt = $conn->prepare("SELECT * FROM contestants WHERE contestant_id = :cid");
+  $cname_stmt->execute([':cid' => $contestant_id]);
+  while ($cname_row = $cname_stmt->fetch()) {
       $contXXname = $cname_row['contestant_ctr'] . " " . $cname_row['lname'] . " " . $cname_row['fname'] . " " . $cname_row['mname'];
       $department = $cname_row['department']; 
   }
@@ -120,8 +125,8 @@ while ($o_result_row = $o_result_query->fetch()) {
          ?>
          <tr>
          <tr>
-               <td><h5><?php echo $contXXname; ?></h5></td>
-               <td><?php echo $department; ?></td> 
+              <td><h5><?php echo View::e($contXXname); ?></h5></td>
+              <td><?php echo View::e($department); ?></td> 
                <td>
           
  <table class="table table-bordered">
@@ -136,8 +141,9 @@ $divz=0;
 $c_ctr=0;
 $totx_score=0;
 $rank_score=0;
-$tot_score_query = $conn->query("select * from sub_results where contestant_id='$contestant_id'") or die(mysql_error());
-while ($tot_score_row = $tot_score_query->fetch()) 
+$tot_score_stmt = $conn->prepare("SELECT * FROM sub_results WHERE contestant_id = :cid");
+$tot_score_stmt->execute([':cid' => $contestant_id]);
+while ($tot_score_row = $tot_score_stmt->fetch()) 
 {
   $divz=$divz+1;  
    $c_ctr=$c_ctr+1;
@@ -145,8 +151,9 @@ while ($tot_score_row = $tot_score_query->fetch())
 } 
 
 
-$tot_score_query = $conn->query("select judge_id,total_score,rank from sub_results where contestant_id='$contestant_id'") or die(mysql_error());
-while ($tot_score_row = $tot_score_query->fetch()) 
+$tot_score_stmt2 = $conn->prepare("SELECT judge_id,total_score,rank FROM sub_results WHERE contestant_id = :cid");
+$tot_score_stmt2->execute([':cid' => $contestant_id]);
+while ($tot_score_row = $tot_score_stmt2->fetch()) 
 {
      $totx_score=$totx_score+$tot_score_row['total_score'];
      $rank_score=$rank_score+$tot_score_row['rank'];
@@ -172,7 +179,7 @@ while ($tot_score_row = $tot_score_query->fetch())
  </table>
 
           </td>
-          <td><center><h3><?php echo $place_title; ?></h3></center></td>
+         <td><center><h3><?php echo View::e($place_title); ?></h3></center></td>
          </tr>
          
          
@@ -191,12 +198,14 @@ while ($tot_score_row = $tot_score_query->fetch())
              <table align="center">  
               <tr>
             <?php
-            $jjn_result_query = $conn->query("select distinct judge_id from sub_results where mainevent_id='$active_main_event' and subevent_id='$active_sub_event' order by judge_id ASC") or die(mysql_error());
-while ($jjn_result_row = $jjn_result_query->fetch()) {
+            $jjn_result_stmt = $conn->prepare("SELECT DISTINCT judge_id FROM sub_results WHERE mainevent_id = :meid AND subevent_id = :sid ORDER BY judge_id ASC");
+            $jjn_result_stmt->execute([':meid' => $active_main_event, ':sid' => $active_sub_event]);
+while ($jjn_result_row = $jjn_result_stmt->fetch()) {
       $jx_id=$jjn_result_row['judge_id'];
       
-    $jname_query = $conn->query("select * from judges where judge_id='$jx_id'") or die(mysql_error());
-$jname_row = $jname_query->fetch();
+    $jname_stmt = $conn->prepare("SELECT * FROM judges WHERE judge_id = :jid");
+$jname_stmt->execute([':jid' => $jx_id]);
+$jname_row = $jname_stmt->fetch();
 
     ?>
             <td>
@@ -217,8 +226,9 @@ $jname_row = $jname_query->fetch();
               <tr>
            
             <?php
-            $jjn_result_query = $conn->query("select * from organizer where org_id='$session_id'") or die(mysql_error());
-while ($jjn_result_row = $jjn_result_query->fetch()) {
+            $jjn_result_stmt2 = $conn->prepare("SELECT * FROM organizer WHERE org_id = :oid");
+            $jjn_result_stmt2->execute([':oid' => $session_id]);
+while ($jjn_result_row = $jjn_result_stmt2->fetch()) {
       
 
     ?>
@@ -238,9 +248,10 @@ while ($jjn_result_row = $jjn_result_query->fetch()) {
  <table align="center"> 
  
               <tr>
-          <?php
-            $jjn_result_query = $conn->query("select * from organizer where organizer_id='$session_id'") or die(mysql_error());
-while ($jjn_result_row = $jjn_result_query->fetch()) {
+            <?php
+            $jjn_result_stmt3 = $conn->prepare("SELECT * FROM organizer WHERE organizer_id = :oid");
+            $jjn_result_stmt3->execute([':oid' => $session_id]);
+while ($jjn_result_row = $jjn_result_stmt3->fetch()) {
       
 
     ?>

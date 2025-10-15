@@ -10,8 +10,9 @@
  $mainevent_id=$_POST['main_event_id'];
 
     
-   	$mainevent_query = $conn->query("SELECT * FROM main_event where mainevent_id='$mainevent_id'") or die(mysql_error());
-    while ($mainevent_row = $mainevent_query->fetch()) 
+   	$mainevent_stmt = $conn->prepare("SELECT * FROM main_event WHERE mainevent_id = :meid");
+    $mainevent_stmt->execute([':meid' => $mainevent_id]);
+    while ($mainevent_row = $mainevent_stmt->fetch()) 
         {
             
             $m_event_name=$mainevent_row['event_name'];
@@ -143,8 +144,9 @@
   
   <tbody>
    <?php    
-   	$subevent_query = $conn->query("SELECT * FROM sub_event where mainevent_id='$mainevent_id'") or die(mysql_error());
-    while ($subevent_row = $subevent_query->fetch()) 
+   	$subevent_stmt = $conn->prepare("SELECT * FROM sub_event WHERE mainevent_id = :meid");
+    $subevent_stmt->execute([':meid' => $mainevent_id]);
+    while ($subevent_row = $subevent_stmt->fetch()) 
         { ?>
   <tr>
   
