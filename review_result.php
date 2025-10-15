@@ -96,7 +96,7 @@
      
      
      <?php
-        require_once __DIR__ . '/vendor/autoload.php'; use App\Support\Database; require_once __DIR__ . '/config.php'; $db = new Database($pdo);
+        require_once __DIR__ . '/vendor/autoload.php'; require_once __DIR__ . '/config.php'; $db = new \App\Support\Database($pdo);
         $o_result_rows = $db->fetchAll("
         SELECT contestant_id, 
                CAST(SUBSTRING_INDEX(place_title, ' ', 1) AS UNSIGNED) AS numeric_rank
@@ -119,7 +119,7 @@ foreach ($o_result_rows as $o_result_row) {
          ?>
          <tr>
          <tr>
-              <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; ?>
+              <?php require_once __DIR__ . '/vendor/autoload.php'; ?>
               <td><h5><?php echo View::e($contXXname); ?></h5></td>
               <td><?php echo View::e($department); ?></td> 
                <td>
@@ -154,7 +154,7 @@ foreach ($tot_score_rows2 as $tot_score_row)
    <tr>
    <td><?php $jx_id=$tot_score_row['judge_id'];
     $jname_row = $db->fetchOne("SELECT * FROM judges WHERE judge_id = :jid", [':jid' => $jx_id]);
- echo View::e($jname_row['fullname']);
+ echo \App\Support\View::e($jname_row['fullname']);
     ?></td>
    <td><?php echo $tot_score_row['total_score']; ?></td>
 
@@ -174,7 +174,7 @@ foreach ($tot_score_rows2 as $tot_score_row)
 
  </table>
           </td>
-  <td><strong><?php echo View::e($place_title) ?></strong></td>
+  <td><strong><?php echo \App\Support\View::e($place_title) ?></strong></td>
          </tr>
          
          

@@ -168,13 +168,13 @@ try {
              <table>
              <tr>
              <td align="center">
-           <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; use App\Support\Database; require_once __DIR__ . '/config.php'; $db = new Database($pdo); ?>
-           <h3><?php echo View::e($event_row['event_name']); ?></h3> 
+           <?php require_once __DIR__ . '/vendor/autoload.php'; require_once __DIR__ . '/config.php'; $db = new \App\Support\Database($pdo); ?>
+           <h3><?php echo \App\Support\View::e($event_row['event_name']); ?></h3> 
              </td>
               </tr>
               <tr>
               <td align="center">
-             <h4> <?php echo View::e($s_event_row['event_name']); ?></h4>
+             <h4> <?php echo \App\Support\View::e($s_event_row['event_name']); ?></h4>
               </td>
               </tr>
                <tr>
@@ -217,8 +217,8 @@ foreach ($o_result_rows as $o_result_row) {
          ?>
          <tr>
          <tr>
-              <td><h5><?php echo View::e($contXXname); ?></h5></td>
-              <td><?php echo View::e($department); ?></td> 
+              <td><h5><?php echo \App\Support\View::e($contXXname); ?></h5></td>
+              <td><?php echo \App\Support\View::e($department); ?></td> 
                <td>
                    <table class="table table-bordered">
            <tr>

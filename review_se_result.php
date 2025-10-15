@@ -73,13 +73,13 @@
              <table>
              <tr>
              <td align="center">
-           <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; ?>
-           <h2><?php echo View::e($event_row['event_name']); ?></h2> 
+           <?php require_once __DIR__ . '/vendor/autoload.php'; ?>
+           <h2><?php echo \App\Support\View::e($event_row['event_name']); ?></h2> 
              </td>
               </tr>
                <tr>
              <td align="center">
-           <h3>Over All Result - <?php echo View::e($s_event_row['event_name']); ?></h3> 
+           <h3>Over All Result - <?php echo \App\Support\View::e($s_event_row['event_name']); ?></h3> 
              </td>
               </tr>
                
@@ -125,8 +125,8 @@ while ($o_result_row = $o_result_stmt->fetch()) {
          ?>
          <tr>
          <tr>
-              <td><h5><?php echo View::e($contXXname); ?></h5></td>
-              <td><?php echo View::e($department); ?></td> 
+              <td><h5><?php echo \App\Support\View::e($contXXname); ?></h5></td>
+              <td><?php echo \App\Support\View::e($department); ?></td> 
                <td>
           
  <table class="table table-bordered">
@@ -179,7 +179,7 @@ while ($tot_score_row = $tot_score_stmt2->fetch())
  </table>
 
           </td>
-         <td><center><h3><?php echo View::e($place_title); ?></h3></center></td>
+         <td><center><h3><?php echo \App\Support\View::e($place_title); ?></h3></center></td>
          </tr>
          
          

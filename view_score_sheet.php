@@ -109,13 +109,13 @@
              <table>
              <tr>
              <td align="center">
-           <?php require_once __DIR__ . '/vendor/autoload.php'; use App\Support\View; use App\Support\Database; require_once __DIR__ . '/config.php'; $db = new Database($pdo); ?>
-           <h2><?php echo View::e($event_row['event_name']); ?></h2> 
+           <?php require_once __DIR__ . '/vendor/autoload.php'; require_once __DIR__ . '/config.php'; $db = new \App\Support\Database($pdo); ?>
+           <h2><?php echo \App\Support\View::e($event_row['event_name']); ?></h2> 
              </td>
               </tr>
                <tr>
              <td align="center">
-           <h3><?php echo View::e($s_event_row['event_name']); ?></h3> 
+           <h3><?php echo \App\Support\View::e($s_event_row['event_name']); ?></h3> 
             <button class="btn btn-warning pull-center non-printable" style="width: 100px;" onclick="window.print();">PRINT</button>
              </td>
               </tr>
