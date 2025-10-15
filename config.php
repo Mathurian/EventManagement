@@ -6,8 +6,8 @@ require_once __DIR__ . '/bootstrap.php';
 
 $dbHost = getenv('DB_HOST') !== false ? getenv('DB_HOST') : 'localhost';
 $dbName = getenv('DB_NAME') !== false ? getenv('DB_NAME') : 'swuetsdb3';
-$dbUser = getenv('DB_USER') !== false ? getenv('DB_USER') : 'root';
-$dbPass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+$dbUser = getenv('DB_USER') !== false ? getenv('DB_USER') : 'tabulation_user';
+$dbPass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'dittibop';
 $dbCharset = getenv('DB_CHARSET') !== false ? getenv('DB_CHARSET') : 'utf8mb4';
 
 $dsn = "mysql:host={$dbHost};dbname={$dbName};charset={$dbCharset}";
